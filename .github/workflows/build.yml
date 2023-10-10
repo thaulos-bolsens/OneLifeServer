@@ -5,7 +5,7 @@ on:
 jobs:
   build:
     name: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout minorGems
         uses: actions/checkout@v4
@@ -26,17 +26,55 @@ jobs:
           path: OneLife
           ref: refs/tags/OneLife_liveServer
           
-      - name: Install libraries
-        run: |
-          sudo apt install g++-mingw-w64 make git -y
+      - name: Set up Cygwin
+        uses: egor-tensin/setup-cygwin@v4
+        with:
+          packages: cmake gcc-g++
 
-      - name: Make changes for windows
-        run: |
+      # - name: Install libraries
+      #   run: |
+      #     sudo apt install mingw-w64-common g++-mingw-w64 make git wine -y
+
+      - run: |
           cd OneLife/server
-          sed -i 's/APP_NAME = OneLifeServer/APP_NAME = OneLifeServer.exe/g' makeFileList
-          for file in ./make*; sed -i 's/g++/g++-mingw-w64/g' $file
+          ./configure 3
+          make \
+                -e PLATFORM=Win32 \
+                -e PLATFORM_PATH=win32 \
+                -e TIME_PLATFORM=Win32 \
+                -e TIME_PLATFORM_PATH=win32 \
+                -e DIRECTORY_PLATFORM=Win32 \
+                -e DIRECTORY_PLATFORM_PATH=win32 \
+                -e POLL_PLATFORM=Unix \
+                -e POLL_PLATFORM_PATH=unix \
+                -e GXX="i686-w64-mingw32-gcc-win32" \
+                -e PLATFORM_LIBJPEG_FLAG="-ljpeg" \
+                -e PLATFORM_LIBPNG_FLAG="-lz -lpng" \
+                -e PLATFORM_COMPILE_FLAGS="-DWIN_32 -DSTATICLIB" \
+                -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -lSDLmain -lSDL -mwindows -lwsock32 -lwinmm -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+                -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+                -e LINK_FLAGS="-lwsock32" \
+                -e APP_NAME=OneLifeServer.exe
+        shell: C:\tools\cygwin\bin\bash.exe --login --norc -eo pipefail -o igncr '{0}'
 
-      - name: Compile server
-        run: |
-          ./configure 1
-          make
+      # - name: Compile server
+      #   run: |
+      #     cd OneLife/server
+      #     ./configure 3
+      #     make \
+      #           -e PLATFORM=Win32 \
+      #           -e PLATFORM_PATH=win32 \
+      #           -e TIME_PLATFORM=Win32 \
+      #           -e TIME_PLATFORM_PATH=win32 \
+      #           -e DIRECTORY_PLATFORM=Win32 \
+      #           -e DIRECTORY_PLATFORM_PATH=win32 \
+      #           -e POLL_PLATFORM=Unix \
+      #           -e POLL_PLATFORM_PATH=unix \
+      #           -e GXX="i686-w64-mingw32-gcc-win32" \
+      #           -e PLATFORM_LIBJPEG_FLAG="-ljpeg" \
+      #           -e PLATFORM_LIBPNG_FLAG="-lz -lpng" \
+      #           -e PLATFORM_COMPILE_FLAGS="-DWIN_32 -DSTATICLIB" \
+      #           -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -lSDLmain -lSDL -mwindows -lwsock32 -lwinmm -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+      #           -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+      #           -e LINK_FLAGS="-lwsock32" \
+      #           -e APP_NAME=OneLifeServer.exe
