@@ -7,24 +7,24 @@ jobs:
     name: build
     runs-on: windows-latest
     steps:
-      - name: Checkout minorGems
-        uses: actions/checkout@v4
-        with:
-          repository: jasonrohrer/minorGems
-          path: minorGems
+      # - name: Checkout minorGems
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: jasonrohrer/minorGems
+      #     path: minorGems
 
-      - name: Checkout OneLifeData7
-        uses: actions/checkout@v4
-        with:
-          repository: jasonrohrer/OneLifeData7
-          path: OneLifeData7
+      # - name: Checkout OneLifeData7
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: jasonrohrer/OneLifeData7
+      #     path: OneLifeData7
 
-      - name: Checkout OneLifeServer
-        uses: actions/checkout@v4
-        with:
-          repository: jasonrohrer/OneLife
-          path: OneLife
-          ref: refs/tags/OneLife_liveServer
+      # - name: Checkout OneLifeServer
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: jasonrohrer/OneLife
+      #     path: OneLife
+      #     ref: refs/tags/OneLife_liveServer
           
       - name: Set up Cygwin
         uses: egor-tensin/setup-cygwin@v4
@@ -36,7 +36,23 @@ jobs:
       #     sudo apt install mingw-w64-common g++-mingw-w64 make git wine -y
 
       - run: |
-          cd OneLife/server
+          git clone https://github.com/jasonrohrer/minorGems.git
+          git clone https://github.com/jasonrohrer/OneLife.git
+          git clone https://github.com/jasonrohrer/OneLifeData7.git
+
+          cd minorGems
+          git fetch --tags
+          latestTaggedVersion=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersion
+
+          cd ../OneLifeData7
+          git fetch --tags
+          latestTaggedVersionB=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersionB
+
+          cd ../OneLife
+          git pull --tags
+          git checkout OneLife_liveServer
+          
+          cd server
           ./configure 3
           make \
                 -e PLATFORM=Win32 \
