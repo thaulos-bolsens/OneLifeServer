@@ -14,32 +14,30 @@ This repository enables the OHOL Server to be run on a docker container locally.
 
 `cd OneLifeServer`
 
-2. Start server
+2. Build server
 
-`docker compose up -d`
+`make build`
 
-3. Stop Server
+3. Start Server
 
-`docker compose stop`
+`make start`
 
-4. Rebuild server (useful when a newer version comes out)
+4. Stop Server
 
-`docker rm ohol-server`
+`make stop`
 
-`docker rmi onelifeserver_server`
+## Additional commands
 
-`docker compose up -d`
+1. Rebuild server (useful when a newer version comes out)
 
-5. Starting map/etc from scratch
+`make rebuild`
 
-`docker rm ohol-server`
+2. Bash into the container
 
-`docker rmi onelifeserver_server`
-
-delete files under `./docker/data`
-
-`docker compose up -d`
+`make bash`
 
 ## Persistence
 
-Data is persisted even if the container and images are removed. You can find the sqlite files in `./docker/data`
+Data is persisted in `./data`
+
+Settings are persisted in `./settings`

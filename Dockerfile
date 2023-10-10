@@ -51,7 +51,13 @@ RUN ln -s /ohol/data/meta.db meta.db
 RUN ln -s /ohol/data/playerStats.db playerStats.db
 RUN ln -s /ohol/data/trust.db trust.db
 
+WORKDIR /ohol/OneLife/server/settings
+RUN mkdir /ohol/settings
+RUN for file in /ohol/OneLife/server/settings/*; do mv -vn $file /ohol/settings/$(basename $file); done
+RUN for file in /ohol/settings/*; do ln -s $file $(basename $file); done
+
+WORKDIR /ohol/OneLife/server
+
 EXPOSE 8005
 
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
 ENTRYPOINT  ["./OneLifeServer"]

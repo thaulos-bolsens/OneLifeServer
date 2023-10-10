@@ -5,13 +5,15 @@ services:
     container_name: ohol-server
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - '8005:8005'
     networks:
       - ohol
     volumes:
-      - ./docker/data:/ohol/data
+      - ./data:/ohol/data
+      - ./settings:/ohol/settings
+
 volumes:
   server:
     driver: local
