@@ -1,15 +1,37 @@
 FROM ubuntu:22.04
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt install git make build-essential sqlite3 libsqlite3-dev -y
+RUN apt install git make build-essential -y
 
 WORKDIR /ohol
 
-COPY ./server/installYourOwnServer/serverPullAndBuildLinux.sh ./serverPullAndBuildLinux.sh
+RUN git clone https://github.com/jasonrohrer/minorGems.git
+RUN git clone https://github.com/jasonrohrer/OneLife.git
+RUN git clone https://github.com/jasonrohrer/OneLifeData7.git
 
-RUN bash serverPullAndBuildLinux.sh
+WORKDIR /ohol/minorGems
+RUN git fetch --tags
+RUN latestTaggedVersion=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersion
+
+WORKDIR /ohol/OneLifeData7
+RUN git fetch --tags
+RUN latestTaggedVersionB=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersionB
+
+WORKDIR /ohol/OneLife
+RUN git pull --tags
+RUN git checkout OneLife_liveServer
+
 
 WORKDIR /ohol/OneLife/server
+RUN ./configure 1
+RUN make
+RUN ln -s ../../OneLifeData7/objects .
+RUN ln -s ../../OneLifeData7/transitions .
+RUN ln -s ../../OneLifeData7/categories .
+RUN ln -s ../../OneLifeData7/tutorialMaps .
+RUN ln -s ../../OneLifeData7/dataVersionNumber.txt .
+
+RUN git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=2 refs/tags | grep "OneLife_v" | sed -e 's/OneLife_v//' > serverCodeVersionNumber.txt
 
 RUN mkdir /ohol/data
 RUN touch /ohol/data/biome.db && touch /ohol/data/curseCount.db && touch /ohol/data/curses.db && touch /ohol/data/eve.db && touch /ohol/data/floor.db && touch /ohol/data/floorTime.db && touch /ohol/data/grave.db && \
