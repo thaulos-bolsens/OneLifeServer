@@ -30,8 +30,13 @@ jobs:
         run: |
           sudo apt install g++-mingw-w64 make git -y
 
-      - name: Compile server
+      - name: Make changes for windows
         run: |
           cd OneLife/server
+          sed -i 's/APP_NAME = OneLifeServer/APP_NAME = OneLifeServer.exe/g' makeFileList
+          for file in ./make*; sed -i 's/g++/g++-mingw-w64/g' $file
+
+      - name: Compile server
+        run: |
           ./configure 1
           make
