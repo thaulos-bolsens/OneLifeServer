@@ -1,12 +1,12 @@
 rebuild:
 	docker compose stop
+	docker rm ohol-server
+	docker rmi  onelifeserver_server
 	make build
 	make start
 
 build:
-	docker rm ohol-server
-	docker rmi  onelifeserver_server
-	docker compose build
+	docker compose build --no-cache
 
 start:
 	docker compose up -d

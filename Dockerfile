@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt install git make build-essential mingw-w64-common g++-mingw-w64 git wine wget -y
+RUN apt install git make build-essential mingw-w64-common g++-mingw-w64 git -y
 
 WORKDIR /ohol
 
@@ -58,13 +58,9 @@ RUN for file in /ohol/settings/*; do ln -s $file $(basename $file); done
 
 WORKDIR /ohol/OneLife/server
 
-RUN ./configure 3
-RUN wget https://www.libsdl.org/release/SDL-devel-1.2.15-mingw32.tar.gz
-RUN tar -xvzf SDL-devel-1.2.15-mingw32.tar.gz
-RUN rm SDL-devel-1.2.15-mingw32.tar.gz
-RUN ln -s ../SDL-1.2.15/include/SDL .
-RUN ln -s /usr/i686-w64-mingw32/include/winsock.h Winsock.h
-
+#RUN ln -s /usr/x86_64-w64-mingw32/include/winsock.h /usr/x86_64-w64-mingw32/include/Winsock.h
+#RUN sed -i 's/windres/x86_64-w64-mingw32-windres/' /ohol/minorGems/game/platforms/SDL/Makefile.MinGW
+#RUN ./configure 3
 
 EXPOSE 8005
 

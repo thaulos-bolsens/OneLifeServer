@@ -28,17 +28,14 @@ jobs:
 
       - name: Install libraries
         run: |
-          sudo apt install mingw-w64-common g++-mingw-w64 make git wine wget -y
+          sudo apt install mingw-w64-common g++-mingw-w64 make git -y
 
       - name: Compile server
         run: |
           cd OneLife/server
           ./configure 3
-          wget https://www.libsdl.org/release/SDL-devel-1.2.15-mingw32.tar.gz
-          tar -xvzf SDL-devel-1.2.15-mingw32.tar.gz
-          rm SDL-devel-1.2.15-mingw32.tar.gz
-          ln -s ../SDL-1.2.15/include/SDL .
-          ln -s /usr/i686-w64-mingw32/include/winsock.h Winsock.h
+          ln -s /usr/x86_64-w64-mingw32/include/winsock.h /usr/x86_64-w64-mingw32/include/Winsock.h
+          sed -i 's/windres/i686-w64-mingw32-windres/' /ohol/minorGems/game/platforms/SDL/Makefile.MinGW
           make \
                 -e PLATFORM=Win32 \
                 -e PLATFORM_PATH=win32 \
@@ -48,10 +45,10 @@ jobs:
                 -e DIRECTORY_PLATFORM_PATH=win32 \
                 -e POLL_PLATFORM=Unix \
                 -e POLL_PLATFORM_PATH=unix \
-                -e GXX="i686-w64-mingw32-gcc-win32" \
+                -e GXX="x86_64-w64-mingw32-gcc" \
                 -e PLATFORM_LIBJPEG_FLAG="-ljpeg" \
                 -e PLATFORM_LIBPNG_FLAG="-lz -lpng" \
                 -e PLATFORM_COMPILE_FLAGS="-DWIN_32 -DSTATICLIB" \
-                -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -lSDLmain -lSDL -mwindows -lwsock32 -lwinmm -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
-                -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
-                -e APP_NAME=OneLifeServer.exe
+                -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -mwindows -lwsock32 -lwinmm -lstdc++ -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+                -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -lstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
+                -e APP_NAME="OneLifeServer.exe"
