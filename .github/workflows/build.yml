@@ -7,53 +7,38 @@ jobs:
     name: build
     runs-on: windows-latest
     steps:
-      # - name: Checkout minorGems
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: jasonrohrer/minorGems
-      #     path: minorGems
-
-      # - name: Checkout OneLifeData7
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: jasonrohrer/OneLifeData7
-      #     path: OneLifeData7
-
-      # - name: Checkout OneLifeServer
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: jasonrohrer/OneLife
-      #     path: OneLife
-      #     ref: refs/tags/OneLife_liveServer
-          
-      - name: Set up Cygwin
-        uses: egor-tensin/setup-cygwin@v4
+      - name: Checkout minorGems
+        uses: actions/checkout@v4
         with:
-          packages: cmake gcc-g++
+          repository: jasonrohrer/minorGems
+          path: minorGems
 
-      # - name: Install libraries
-      #   run: |
-      #     sudo apt install mingw-w64-common g++-mingw-w64 make git wine -y
+      - name: Checkout OneLifeData7
+        uses: actions/checkout@v4
+        with:
+          repository: jasonrohrer/OneLifeData7
+          path: OneLifeData7
 
-      - run: |
-          git clone https://github.com/jasonrohrer/minorGems.git
-          git clone https://github.com/jasonrohrer/OneLife.git
-          git clone https://github.com/jasonrohrer/OneLifeData7.git
+      - name: Checkout OneLifeServer
+        uses: actions/checkout@v4
+        with:
+          repository: jasonrohrer/OneLife
+          path: OneLife
+          ref: refs/tags/OneLife_liveServer
 
-          cd minorGems
-          git fetch --tags
-          latestTaggedVersion=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersion
+      - name: Install libraries
+        run: |
+          sudo apt install mingw-w64-common g++-mingw-w64 make git wine wget -y
 
-          cd ../OneLifeData7
-          git fetch --tags
-          latestTaggedVersionB=`git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=1 refs/tags/OneLife_v* | sed -e 's/OneLife_v//'` && git checkout -q OneLife_v$latestTaggedVersionB
-
-          cd ../OneLife
-          git pull --tags
-          git checkout OneLife_liveServer
-          
-          cd server
+      - name: Compile server
+        run: |
+          cd OneLife/server
           ./configure 3
+          wget https://www.libsdl.org/release/SDL-devel-1.2.15-mingw32.tar.gz
+          tar -xvzf SDL-devel-1.2.15-mingw32.tar.gz
+          rm SDL-devel-1.2.15-mingw32.tar.gz
+          ln -s ../SDL-1.2.15/include/SDL .
+          ln -s /usr/i686-w64-mingw32/include/winsock.h Winsock.h
           make \
                 -e PLATFORM=Win32 \
                 -e PLATFORM_PATH=win32 \
@@ -69,28 +54,4 @@ jobs:
                 -e PLATFORM_COMPILE_FLAGS="-DWIN_32 -DSTATICLIB" \
                 -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -lSDLmain -lSDL -mwindows -lwsock32 -lwinmm -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
                 -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
-                -e LINK_FLAGS="-lwsock32" \
                 -e APP_NAME=OneLifeServer.exe
-        shell: C:\tools\cygwin\bin\bash.exe --login --norc -eo pipefail -o igncr '{0}'
-
-      # - name: Compile server
-      #   run: |
-      #     cd OneLife/server
-      #     ./configure 3
-      #     make \
-      #           -e PLATFORM=Win32 \
-      #           -e PLATFORM_PATH=win32 \
-      #           -e TIME_PLATFORM=Win32 \
-      #           -e TIME_PLATFORM_PATH=win32 \
-      #           -e DIRECTORY_PLATFORM=Win32 \
-      #           -e DIRECTORY_PLATFORM_PATH=win32 \
-      #           -e POLL_PLATFORM=Unix \
-      #           -e POLL_PLATFORM_PATH=unix \
-      #           -e GXX="i686-w64-mingw32-gcc-win32" \
-      #           -e PLATFORM_LIBJPEG_FLAG="-ljpeg" \
-      #           -e PLATFORM_LIBPNG_FLAG="-lz -lpng" \
-      #           -e PLATFORM_COMPILE_FLAGS="-DWIN_32 -DSTATICLIB" \
-      #           -e PLATFORM_LINK_FLAGS="-lopengl32 -lglu32 -lmingw32 -lSDLmain -lSDL -mwindows -lwsock32 -lwinmm -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
-      #           -e PLATFORM_LINK_FLAGS_HEADLESS="-lmingw32 -mconsole -mwindows -lwsock32 -static-libstdc++ -static-libgcc ${CUSTOM_MINGW_LINK_FLAGS}" \
-      #           -e LINK_FLAGS="-lwsock32" \
-      #           -e APP_NAME=OneLifeServer.exe
