@@ -4,7 +4,7 @@ This repository enables the OHOL Server to be run on a docker container locally.
 
 ## Requirements
 
-1. docker (https://www.docker.com/products/docker-desktop/ or https://rancherdesktop.io/)
+1. docker ([https://www.docker.com/products/docker-desktop/](https://docs.docker.com/desktop/install/windows-install/) or https://rancherdesktop.io/)
 
 ## Instructions
 
