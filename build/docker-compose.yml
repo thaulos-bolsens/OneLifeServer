@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  builder:
+    container_name: ohol-builder
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    networks:
+      - ohol
+    volumes:
+      - ./include:/ohol/include
+
+volumes:
+  server:
+    driver: local
+
+networks:
+  ohol:
+    name: ohol
+    driver: bridge

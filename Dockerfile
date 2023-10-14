@@ -1,8 +1,14 @@
 FROM ubuntu:22.04
 
+# update system package
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt install git make build-essential mingw-w64-common g++-mingw-w64 git -y
 
+
+# install dependencies
+RUN apt install git make build-essential -y
+
+
+# get the latest release versions of minorGems, OneLife and OneLifeData7
 WORKDIR /ohol
 
 RUN git clone https://github.com/jasonrohrer/minorGems.git
@@ -22,7 +28,9 @@ RUN git pull --tags
 RUN git checkout OneLife_liveServer
 
 
+#  build the server
 WORKDIR /ohol/OneLife/server
+
 RUN ./configure 1
 RUN make
 RUN ln -s ../../OneLifeData7/objects .
@@ -30,38 +38,13 @@ RUN ln -s ../../OneLifeData7/transitions .
 RUN ln -s ../../OneLifeData7/categories .
 RUN ln -s ../../OneLifeData7/tutorialMaps .
 RUN ln -s ../../OneLifeData7/dataVersionNumber.txt .
-
 RUN git for-each-ref --sort=-creatordate --format '%(refname:short)' --count=2 refs/tags | grep "OneLife_v" | sed -e 's/OneLife_v//' > serverCodeVersionNumber.txt
+COPY run.sh run.sh
 
-RUN mkdir /ohol/data
-RUN touch /ohol/data/biome.db && touch /ohol/data/curseCount.db && touch /ohol/data/curses.db && touch /ohol/data/eve.db && touch /ohol/data/floor.db && touch /ohol/data/floorTime.db && touch /ohol/data/grave.db && \
-    touch /ohol/data/lookTime.db && touch /ohol/data/map.db && touch /ohol/data/mapTime.db && touch /ohol/data/meta.db && touch /ohol/data/playerStats.db && touch /ohol/data/trust.db
 
-RUN ln -s /ohol/data/biome.db biome.db
-RUN ln -s /ohol/data/curseCount.db curseCount.db
-RUN ln -s /ohol/data/curses.db curses.db
-RUN ln -s /ohol/data/eve.db eve.db
-RUN ln -s /ohol/data/floor.db floor.db
-RUN ln -s /ohol/data/floorTime.db floorTime.db
-RUN ln -s /ohol/data/grave.db grave.db
-RUN ln -s /ohol/data/lookTime.db lookTime.db
-RUN ln -s /ohol/data/map.db map.db
-RUN ln -s /ohol/data/mapTime.db mapTime.db
-RUN ln -s /ohol/data/meta.db meta.db
-RUN ln -s /ohol/data/playerStats.db playerStats.db
-RUN ln -s /ohol/data/trust.db trust.db
-
-WORKDIR /ohol/OneLife/server/settings
-RUN mkdir /ohol/settings
-RUN for file in /ohol/OneLife/server/settings/*; do mv -vn $file /ohol/settings/$(basename $file); done
-RUN for file in /ohol/settings/*; do ln -s $file $(basename $file); done
-
-WORKDIR /ohol/OneLife/server
-
-#RUN ln -s /usr/x86_64-w64-mingw32/include/winsock.h /usr/x86_64-w64-mingw32/include/Winsock.h
-#RUN sed -i 's/windres/x86_64-w64-mingw32-windres/' /ohol/minorGems/game/platforms/SDL/Makefile.MinGW
-#RUN ./configure 3
-
+# connect to this server via localhost:8005
 EXPOSE 8005
 
-ENTRYPOINT  ["./OneLifeServer"]
+
+# run server
+ENTRYPOINT  ["./run.sh"]
