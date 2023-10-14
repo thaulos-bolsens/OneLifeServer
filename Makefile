@@ -6,7 +6,7 @@ rebuild:
 	make start
 
 build:
-	docker compose build --no-cache
+	docker compose build
 
 start:
 	docker compose up -d

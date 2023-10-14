@@ -10,6 +10,7 @@ services:
       - ohol
     volumes:
       - ./include:/ohol/include
+      - ./output:/ohol/output
 
 volumes:
   server:
